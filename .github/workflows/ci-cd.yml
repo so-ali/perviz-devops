@@ -99,9 +99,9 @@ jobs:
 
       - name: Save Docker images (for deployment)
         run: |
-          docker save -o backend.tar fullstack-app-backend:latest
-          docker save -o frontend.tar fullstack-app-frontend:latest
-          docker save -o nginx.tar fullstack-app-nginx:latest
+          docker save fullstack-app-backend:latest > backend.tar
+          docker save fullstack-app-frontend:latest > frontend.tar
+          docker save fullstack-app-nginx:latest > nginx.tar
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
