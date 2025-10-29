@@ -17,6 +17,7 @@ services:
       retries: 5
 
   backend:
+    image: fullstack-app-backend:latest
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -40,6 +41,7 @@ services:
       retries: 3
 
   frontend:
+    image: fullstack-app-frontend:latest
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -55,6 +57,7 @@ services:
       - fullstack-network
 
   nginx:
+    image: fullstack-app-nginx:latest
     build:
       context: ./nginx
       dockerfile: Dockerfile
