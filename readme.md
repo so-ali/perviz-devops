@@ -272,3 +272,110 @@ fullstack-redis         0.08%    4.2MiB / unlimited    156kB / 98kB
   - build-and-deploy ✓
 
 ---
+
+### 12. Cloudflare Protection Simulation
+
+#### DNS Setup
+
+**Cloudflare DNS Configuration:**
+
+```
+Type    Name            Content              Proxy Status   TTL
+A       @               <YOUR_SERVER_IP>     Proxied        Auto
+A       www             <YOUR_SERVER_IP>     Proxied        Auto
+CNAME   api             @                    Proxied        Auto
+```
+
+#### Caching Configuration
+
+**Page Rules (in order of priority):**
+
+1. **API Endpoints - Bypass Cache**
+
+   - URL: `*example.com/api/*`
+   - Settings:
+     - Cache Level: Bypass
+     - Security Level: High
+
+2. **Static Assets - Aggressive Caching**
+
+   - URL: `*example.com/*.(css|js|jpg|png|gif|svg|woff|woff2)`
+   - Settings:
+     - Cache Level: Cache Everything
+     - Edge Cache TTL: 1 month
+     - Browser Cache TTL: 4 hours
+
+3. **Homepage - Standard Caching**
+   - URL: `example.com/`
+   - Settings:
+     - Cache Level: Standard
+     - Browser Cache TTL: 2 hours
+
+#### Rate Limiting Rules
+
+**Rule 1: API Protection**
+
+```yaml
+Name: API Rate Limit
+Expression: (http.request.uri.path contains "/api/")
+Characteristics:
+  - When incoming requests match: 100 requests per 1 minute
+  - Then take action: Block
+  - Duration: 10 minutes
+  - Response: Custom HTML with 429 status
+```
+
+**Rule 2: Login Protection**
+
+```yaml
+Name: Login Rate Limit
+Expression: (http.request.uri.path eq "/api/auth/login" and http.request.method eq "POST")
+Characteristics:
+  - When incoming requests match: 5 requests per 5 minutes
+  - Then take action: Challenge (CAPTCHA)
+  - Duration: 15 minutes
+```
+
+#### Firewall Rules
+
+**Rule 1: Block Known Bad Bots**
+
+```
+Expression: (cf.client.bot) and not (cf.verified_bot_category in {"Search Engine Crawler" "Monitoring & Analytics"})
+Action: Block
+```
+
+**Rule 2: Geographic Restrictions (if needed)**
+
+```
+Expression: (ip.geoip.country in {"XX" "YY" "ZZ"})
+Action: Challenge
+```
+
+**Rule 3: Security Level by Path**
+
+```
+Expression: (http.request.uri.path contains "/admin")
+Action: Managed Challenge
+```
+
+**Rule 4: DDoS Protection**
+
+```
+Expression: (http.request.uri.path eq "/" and rate(5m) > 100)
+Action: Block
+```
+
+#### Security Settings
+
+**Recommended Cloudflare Settings:**
+
+1. **SSL/TLS:** Full (Strict)
+2. **Always Use HTTPS:** On
+3. **Minimum TLS Version:** 1.2
+4. **Automatic HTTPS Rewrites:** On
+5. **Security Level:** Medium
+6. **Challenge Passage:** 30 minutes
+7. **Browser Integrity Check:** On
+8. **Hotlink Protection:** On
+9. **Bot Fight Mode:** On (Free) or Bot Management (Paid)
