@@ -128,9 +128,9 @@ jobs:
 
       - name: Load Docker images
         run: |
-          docker load < backend.tar.gz
-          docker load < frontend.tar.gz
-          docker load < nginx.tar.gz
+          gunzip -c backend.tar.gz | docker load
+          gunzip -c frontend.tar.gz | docker load
+          gunzip -c nginx.tar.gz | docker load
 
       - name: Deploy with Docker Compose
         run: |
