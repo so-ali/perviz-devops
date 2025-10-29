@@ -99,18 +99,18 @@ jobs:
 
       - name: Save Docker images (for deployment)
         run: |
-          docker save fullstack-app-backend:latest | gzip > backend.tar.gz
-          docker save fullstack-app-frontend:latest | gzip > frontend.tar.gz
-          docker save fullstack-app-nginx:latest | gzip > nginx.tar.gz
+          docker save -o backend.tar fullstack-app-backend:latest
+          docker save -o frontend.tar fullstack-app-frontend:latest
+          docker save -o nginx.tar fullstack-app-nginx:latest
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
         with:
           name: docker-images
           path: |
-            backend.tar.gz
-            frontend.tar.gz
-            nginx.tar.gz
+            backend.tar
+            frontend.tar
+            nginx.tar
           retention-days: 7
 
   deploy-to-local:
@@ -128,9 +128,9 @@ jobs:
 
       - name: Load Docker images
         run: |
-          gunzip -c backend.tar.gz | docker load
-          gunzip -c frontend.tar.gz | docker load
-          gunzip -c nginx.tar.gz | docker load
+          docker load -i backend.tar
+          docker load -i frontend.tar
+          docker load -i nginx.tar
 
       - name: Deploy with Docker Compose
         run: |
